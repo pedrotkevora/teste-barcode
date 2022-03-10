@@ -1,36 +1,20 @@
 <html>
   <body>
-  <canvas id="canvas" height="240" width="320"></canvas>
-  <div id="barcode"></div>
+	<img src="https://i.postimg.cc/JzNQGK23/download.png"/>
   <script>
-  navigator.mediaDevices.enumerateDevices().then((devices) => {
-	console.log(JSON.stringify(devices));
-	let id = devices.filter((device) => device.kind === "videoinput").slice(-1).pop().deviceId;
-  let constrains = {video: {optional: [{sourceId: id }]}};
+window.onload = () => {
+  const barcodeDetector = new BarcodeDetector();
+  const image = document.querySelector("img");
 
-  navigator.mediaDevices.getUserMedia(constrains).then((stream) => {
-    let capturer = new ImageCapture(stream.getVideoTracks()[0]);
-  	step(capturer);
-  });
-});
-
-function step(capturer) {
-    capturer.grabFrame().then((bitmap) => {
-      let canvas = document.getElementById("canvas");
-      let ctx = canvas.getContext("2d");
-      ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, canvas.width, canvas.height);
-      var barcodeDetector = new BarcodeDetector();
-      barcodeDetector.detect(bitmap)
-        .then(barcodes => {
-          document.getElementById("barcodes").innerHTML = barcodes.map(barcode => barcode.rawValue).join(', ');
-          step(capturer);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    });
-}
-  
+  barcodeDetector
+    .detect(image)
+    .then((barcodes) => {
+      let pre = document.createElement("pre");
+      pre.innerHTML = JSON.stringify(barcodes, null, 2);
+      image.after(pre);
+    })
+    .catch(console.error);
+};
   </script>
   </body>
 </html>
